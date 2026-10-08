@@ -1,0 +1,79 @@
+groups:
+  - name: smart-support-agent
+    rules:
+      - alert: SmartSupportTargetDown
+        expr: up{job="smart-support-agent"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: SmartSupport API is unavailable
+          description: Prometheus has been unable to scrape the API for two minutes.
+
+      - alert: SmartSupportHighHttpErrorRate
+        expr: |
+          (
+            sum(rate(smart_support_http_requests_total{status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(smart_support_http_requests_total[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: HTTP 5xx rate is above 5 percent
+          description: More than 5 percent of API requests have failed for ten minutes.
+
+      - alert: SmartSupportHighHttpLatency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(smart_support_http_request_duration_seconds_bucket[5m]))
+          ) > 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: HTTP P95 latency is above five seconds
+          description: The API P95 response time has exceeded five seconds for ten minutes.
+
+      - alert: SmartSupportHighLlmErrorRate
+        expr: |
+          (
+            sum(increase(smart_support_llm_calls_total{status="error"}[10m]))
+            /
+            clamp_min(sum(increase(smart_support_llm_calls_total[10m])), 1)
+          ) > 0.10
+          and
+          sum(increase(smart_support_llm_calls_total[10m])) >= 5
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: LLM error rate is above 10 percent
+          description: At least five model calls occurred and more than 10 percent failed in ten minutes.
+
+      - alert: SmartSupportHighRagMissRate
+        expr: |
+          (
+            sum(increase(smart_support_rag_searches_total{outcome="miss"}[10m]))
+            /
+            clamp_min(sum(increase(smart_support_rag_searches_total{outcome=~"hit|miss"}[10m])), 1)
+          ) > 0.30
+          and
+          sum(increase(smart_support_rag_searches_total{outcome=~"hit|miss"}[10m])) >= 10
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: RAG miss rate is above 30 percent
+          description: At least ten searches occurred and more than 30 percent returned no evidence in ten minutes.
+
+      - alert: SmartSupportToolFailures
+        expr: sum(increase(smart_support_tool_calls_total{status=~"blocked|error"}[10m])) >= 3
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Repeated business tool failures detected
+          description: Three or more business tool calls were blocked or failed in ten minutes.

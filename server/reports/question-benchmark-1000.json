@@ -1,0 +1,154 @@
+{
+  "dataset_size": 3200,
+  "sample_size": 1000,
+  "seed": 20260721,
+  "mode": "offline-no-deepseek-billing",
+  "success_count": 1000,
+  "success_rate": 1.0,
+  "elapsed_seconds": 5.43,
+  "throughput_per_second": 184.16,
+  "latency_ms": {
+    "median": 5.21,
+    "p95": 9.04,
+    "max": 52.06
+  },
+  "intent_distribution": {
+    "knowledge_qa": 497,
+    "general_chat": 126,
+    "order_query": 113,
+    "refund_request": 111,
+    "human_handoff": 87,
+    "shipment_query": 66
+  },
+  "category_distribution": {
+    "products_warranty": 142,
+    "payment_invoice": 124,
+    "returns_policy": 114,
+    "logistics": 109,
+    "account_security": 98,
+    "orders": 88,
+    "refund_actions": 78,
+    "unknown": 73,
+    "membership": 71,
+    "general": 69,
+    "handoff": 34
+  },
+  "category_success_rate": {
+    "account_security": 1.0,
+    "general": 1.0,
+    "handoff": 1.0,
+    "logistics": 1.0,
+    "membership": 1.0,
+    "orders": 1.0,
+    "payment_invoice": 1.0,
+    "products_warranty": 1.0,
+    "refund_actions": 1.0,
+    "returns_policy": 1.0,
+    "unknown": 1.0
+  },
+  "tool_call_count": 73,
+  "handoff_count": 98,
+  "known_knowledge_citation_rate": 0.9911,
+  "unknown_gap_detection_rate": 0.6438,
+  "top_retrieval_misses": [
+    {
+      "question": "您好，可以导出我的个人数据吗，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "想咨询一下，可以导出我的个人数据吗，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "您好，可以导出我的个人数据吗",
+      "count": 1
+    },
+    {
+      "question": "请问，可以导出我的个人数据吗，谢谢。",
+      "count": 1
+    }
+  ],
+  "top_detected_unknown_questions": [
+    {
+      "question": "您好，咖啡豆烘焙课程什么时候开课",
+      "count": 1
+    },
+    {
+      "question": "我想了解，商场停车位怎么申请，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "您好，咖啡豆烘焙课程什么时候开课，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "方便说明一下吗，咖啡豆烘焙课程什么时候开课，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "请帮忙处理，海外留学咨询收费多少，能详细说说吗？",
+      "count": 1
+    },
+    {
+      "question": "您好，量子纠缠课程怎么报名，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "请问，海外留学咨询收费多少，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "我有个问题，量子纠缠课程怎么报名，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "请问，量子纠缠课程怎么报名",
+      "count": 1
+    },
+    {
+      "question": "我想了解，海外留学咨询收费多少？",
+      "count": 1
+    },
+    {
+      "question": "能帮我看看吗，咖啡豆烘焙课程什么时候开课",
+      "count": 1
+    },
+    {
+      "question": "海外留学咨询收费多少？",
+      "count": 1
+    },
+    {
+      "question": "我想了解，咖啡豆烘焙课程什么时候开课？",
+      "count": 1
+    },
+    {
+      "question": "能帮我看看吗，海外留学咨询收费多少，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "您好，商场停车位怎么申请，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "量子纠缠课程怎么报名",
+      "count": 1
+    },
+    {
+      "question": "量子纠缠课程怎么报名，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "麻烦帮我确认，商场停车位怎么申请，谢谢。",
+      "count": 1
+    },
+    {
+      "question": "我有个问题，咖啡豆烘焙课程什么时候开课，应该怎么处理？",
+      "count": 1
+    },
+    {
+      "question": "想咨询一下，量子纠缠课程怎么报名，能详细说说吗？",
+      "count": 1
+    }
+  ],
+  "failures": []
+}

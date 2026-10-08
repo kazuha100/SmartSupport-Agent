@@ -1,0 +1,30 @@
+{
+  "name": "smart-support-agent-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode employee --port 5173",
+    "dev:employee": "vite --mode employee --port 5173",
+    "dev:mall": "vite --mode mall --port 5175 --strictPort",
+    "build": "npm run build:employee && npm run build:mall",
+    "build:employee": "tsc -b && vite build --mode employee --outDir dist",
+    "build:mall": "tsc -b && vite build --mode mall --outDir dist-mall",
+    "preview": "vite preview --outDir dist --port 4173",
+    "preview:mall": "vite preview --outDir dist-mall --port 4174"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

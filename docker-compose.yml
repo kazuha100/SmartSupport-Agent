@@ -1,0 +1,136 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: smart_support
+      POSTGRES_USER: smart_support
+      POSTGRES_PASSWORD: smart_support_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smart_support -d smart_support"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      APP_ENV: production
+      WEB_ORIGIN: http://localhost:5173
+      KNOWLEDGE_BASE_PATH: /knowledge-base
+      DATABASE_URL: postgresql+psycopg://smart_support:smart_support_dev@db:5432/smart_support
+      UPLOAD_DIR: /app/data/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-10}
+      EMBEDDING_MODE: local
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-zh-v1.5}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-512}
+      KNOWLEDGE_GAP_SIMILARITY_THRESHOLD: ${KNOWLEDGE_GAP_SIMILARITY_THRESHOLD:-0.82}
+      KNOWLEDGE_GAP_BACKFILL_LIMIT: ${KNOWLEDGE_GAP_BACKFILL_LIMIT:-200}
+      AUTH_SECRET: ${AUTH_SECRET:-replace-with-a-long-random-secret}
+      AUTH_TOKEN_MINUTES: ${AUTH_TOKEN_MINUTES:-480}
+      REQUESTS_PER_MINUTE: ${REQUESTS_PER_MINUTE:-600}
+      CHAT_REQUESTS_PER_MINUTE: ${CHAT_REQUESTS_PER_MINUTE:-30}
+      REDIS_URL: redis://redis:6379/0
+      OFF_TOPIC_MAX_CONSECUTIVE_QUESTIONS: ${OFF_TOPIC_MAX_CONSECUTIVE_QUESTIONS:-3}
+      OFF_TOPIC_WINDOW_SECONDS: ${OFF_TOPIC_WINDOW_SECONDS:-1800}
+      INTENT_ROUTER_MIN_CONFIDENCE: ${INTENT_ROUTER_MIN_CONFIDENCE:-0.65}
+      LLM_MODE: ${LLM_MODE:-mock}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-30}
+    ports:
+      - "8000:8000"
+    volumes:
+      - app_data:/app/data
+      - model_cache:/root/.cache/huggingface
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        FRONTEND_DIST: dist
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+
+  mall-web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      args:
+        FRONTEND_DIST: dist-mall
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      - "5175:80"
+
+  prometheus:
+    image: prom/prometheus:v3.4.1
+    command: --config.file=/etc/prometheus/prometheus.yml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./ops/prometheus-alerts.yml:/etc/prometheus/rules/smart-support-agent.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:12.0.2
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-smart-support-dev}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_started
+    ports:
+      - "3000:3000"
+
+volumes:
+  app_data:
+  postgres_data:
+  redis_data:
+  model_cache:
+  prometheus_data:
+  grafana_data:
